@@ -1,5 +1,5 @@
 (()=>{"use strict";
-const tracks=[{"title": "B-APlaya", "src": "assets/beats/track-01.mp3"}, {"title": "BirdzSing", "src": "assets/beats/track-02.mp3"}, {"title": "RockWitYa", "src": "assets/beats/track-03.mp3"}, {"title": "OnThatFR", "src": "assets/beats/track-04.mp3"}, {"title": "amtrakk", "src": "assets/beats/track-05.mp3"}, {"title": "Redy$U", "src": "assets/beats/track-06.mp3"}, {"title": "EvryThingEyeNeed", "src": "assets/beats/track-07.mp3"}, {"title": "HarpHeart", "src": "assets/beats/track-08.mp3"}];
+const tracks=[{"title": "Be A Playa", "src": "assets/beats/track-01.mp3"}, {"title": "BirdzSing", "src": "assets/beats/track-02.mp3"}, {"title": "RockWitYa", "src": "assets/beats/track-03.mp3"}, {"title": "OnThatFR", "src": "assets/beats/track-04.mp3"}, {"title": "Amtrakk", "src": "assets/beats/track-05.mp3"}, {"title": "Redy$U", "src": "assets/beats/track-06.mp3"}, {"title": "EvryThingEyeNeed", "src": "assets/beats/track-07.mp3"}, {"title": "HarpHeart", "src": "assets/beats/track-08.mp3"}];
 const audio=document.getElementById('gradea-audio');
 const el=id=>document.getElementById(id);
 const list=el('gradea-track-list');
