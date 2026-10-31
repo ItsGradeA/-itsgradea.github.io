@@ -1,6 +1,6 @@
 GRADEA — THE FREQUENCY BEAT PLAYER
 
-Includes 8 original uploaded beats, including MP3 conversions of two WAVs for smaller web files.
+Includes original uploaded beats, including MP3 conversions of two WAVs for smaller web files.
 
 Install: Upload index.html, style.css, script.js and beat-player.js to the ROOT of the GitHub Pages repository. Upload assets/beats/track-01.mp3 through track-08.mp3 into assets/beats/ (create the folder first). Keep all existing assets including skyline.mp4 and skyline.jpg. Do not delete existing site assets.
 
