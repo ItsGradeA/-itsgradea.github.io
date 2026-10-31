@@ -5,11 +5,28 @@ const el=id=>document.getElementById(id);
 const list=el('gradea-track-list');
 const FEATURED_TITLE='Be A Playa'; // Change this to any exact title in beats.json.
 let tracks=fallbackTracks,current=0,shuffle=false,repeat=false,history=[],historyCursor=-1;
+const requestedBeat=new URLSearchParams(window.location.search).get('beat');
 audio.volume=.8;
 const time=n=>Number.isFinite(n)?`${Math.floor(n/60)}:${String(Math.floor(n%60)).padStart(2,'0')}`:'0:00';
 function trackEvent(name,detail={}){if(typeof window.gtag==='function')window.gtag('event',name,detail)}
-function sync(){const playing=!audio.paused;['gradea-main-play','gradea-sticky-play'].forEach(id=>{el(id).textContent=playing?'❚❚':'▶';el(id).setAttribute('aria-label',playing?'Pause':'Play')});list.querySelectorAll('button').forEach((b,i)=>{b.classList.toggle('is-active',i===current);b.querySelector('.gradea-track-icon').textContent=i===current&&playing?'❚❚':'▶'});el('gradea-play-status').textContent=playing?'NOW TRANSMITTING':'READY TO PLAY'}
-function render(){list.replaceChildren();tracks.forEach((t,i)=>{const b=document.createElement('button');b.type='button';b.className='gradea-track';b.innerHTML=`<span class="gradea-track-index">${String(i+1).padStart(2,'0')}</span><span class="gradea-track-name"></span><span class="gradea-track-icon">▶</span>`;b.querySelector('.gradea-track-name').textContent=t.title;b.addEventListener('click',()=>{if(i===current)toggle();else load(i,true)});list.append(b)});el('gradea-track-count').textContent=`${String(tracks.length).padStart(2,'0')} TRACKS / ORIGINAL PRODUCTION`;sync()}
+function sync(){const playing=!audio.paused;['gradea-main-play','gradea-sticky-play'].forEach(id=>{el(id).textContent=playing?'❚❚':'▶';el(id).setAttribute('aria-label',playing?'Pause':'Play')});list.querySelectorAll('.gradea-track').forEach((row,i)=>{row.classList.toggle('is-active',i===current);row.querySelector('.gradea-track-icon').textContent=i===current&&playing?'❚❚':'▶'});el('gradea-play-status').textContent=playing?'NOW TRANSMITTING':'READY TO PLAY'}
+function shareURL(title){const url=new URL(window.location.origin+window.location.pathname);url.searchParams.set('beat',title);url.hash='beat-player';return url.toString()}
+async function shareTrack(title,button){const url=shareURL(title);try{
+  if(navigator.share){await navigator.share({title:`${title} — GradeA`,text:`Listen to ${title} on THE FREQUENCY`,url});trackEvent('beat_share',{beat_title:title,method:'native'});return}
+  if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(url)}
+  else{const input=document.createElement('textarea');input.value=url;input.style.position='fixed';input.style.opacity='0';document.body.append(input);input.select();if(!document.execCommand('copy'))throw Error('Copy unavailable');input.remove()}
+  const old=button.textContent;button.textContent='✓ COPIED';button.setAttribute('aria-label',`Link copied for ${title}`);setTimeout(()=>{button.textContent=old;button.setAttribute('aria-label',`Share ${title}`)},2200);
+  trackEvent('beat_share',{beat_title:title,method:'copy'});
+}catch(e){if(e.name!=='AbortError')window.prompt('Copy this beat link:',url)} }
+function render(){list.replaceChildren();tracks.forEach((t,i)=>{
+ const row=document.createElement('div');row.className='gradea-track';
+ const play=document.createElement('button');play.type='button';play.className='gradea-track-play';play.innerHTML=`<span class="gradea-track-index">${String(i+1).padStart(2,'0')}</span><span class="gradea-track-name"></span><span class="gradea-track-icon">▶</span>`;
+ play.querySelector('.gradea-track-name').textContent=t.title;play.setAttribute('aria-label',`Play ${t.title}`);
+ play.addEventListener('click',()=>{if(i===current)toggle();else load(i,true)});
+ const share=document.createElement('button');share.type='button';share.className='gradea-share';share.textContent='↗ SHARE';share.setAttribute('aria-label',`Share ${t.title}`);share.addEventListener('click',()=>shareTrack(t.title,share));
+ row.append(play,share);list.append(row)
+ });el('gradea-track-count').textContent=`${String(tracks.length).padStart(2,'0')} TRACKS / ORIGINAL PRODUCTION`;sync()}
+function applySharedBeat(){if(!requestedBeat)return;const index=tracks.findIndex(t=>t.title.toLocaleLowerCase()===requestedBeat.toLocaleLowerCase());if(index>=0){load(index,false);el('gradea-play-status').textContent='SHARED BEAT · PRESS PLAY';}else console.warn('Shared beat not found:',requestedBeat)}
 function load(i,play=false){if(!tracks.length)return;current=(i+tracks.length)%tracks.length;audio.src=tracks[current].src;el('gradea-current-title').textContent=tracks[current].title;el('gradea-sticky-title').textContent=tracks[current].title;el('gradea-current-time').textContent='0:00';el('gradea-duration').textContent='0:00';el('gradea-seek').value=0;el('gradea-sticky-seek').value=0;sync();if(play)audio.play().catch(()=>{})}
 function toggle(){if(audio.paused)audio.play().catch(()=>{});else audio.pause()}
 function nextIndex(){if(!shuffle||tracks.length<2)return (current+1)%tracks.length;let i=current;while(i===current)i=Math.floor(Math.random()*tracks.length);return i}
@@ -28,8 +45,8 @@ audio.addEventListener('timeupdate',()=>{el('gradea-current-time').textContent=t
 el('gradea-volume').addEventListener('input',e=>audio.volume=Number(e.target.value)/100);
 document.querySelectorAll('a[href^="mailto:"]').forEach(a=>a.addEventListener('click',()=>trackEvent('contact_click',{contact_type:a.textContent.trim()})));
 document.querySelectorAll('a[href*="spotify.com"],a[href*="music.apple.com"]').forEach(a=>a.addEventListener('click',()=>trackEvent('streaming_click',{destination:a.href})));
-render();load(0);
-fetch('beats.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('Missing beats.json');return r.json()}).then(items=>{if(!Array.isArray(items)||!items.length||!items.every(t=>typeof t.title==='string'&&typeof t.src==='string'))throw Error('Invalid beats.json');tracks=items;render();load(0)}).catch(e=>console.warn('Using built-in playlist:',e));
+render();load(0);applySharedBeat();
+fetch('beats.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('Missing beats.json');return r.json()}).then(items=>{if(!Array.isArray(items)||!items.length||!items.every(t=>typeof t.title==='string'&&typeof t.src==='string'))throw Error('Invalid beats.json');tracks=items;render();load(0);applySharedBeat()}).catch(e=>console.warn('Using built-in playlist:',e));
 
 // Real-time oscilloscope waveform: one audio source shared across all tracks.
 (function setupWaveform(){

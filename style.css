@@ -58,3 +58,12 @@ body{padding-bottom:76px}
 #gradea-play-status{font:500 10px 'Space Grotesk',sans-serif;letter-spacing:.14em;color:#a8a0b9;margin-left:auto}
 .inquiry-types{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:25px auto 22px;max-width:900px}
 @media(max-width:600px){.gradea-featured-label{padding:12px}.gradea-player-options{gap:8px}#gradea-play-status{width:100%;margin-left:0}.inquiry-types a{font-size:10px}}
+
+/* Individual share links for THE FREQUENCY */
+.gradea-track{padding:0;overflow:hidden;gap:0}
+.gradea-track-play{display:flex;align-items:center;gap:14px;flex:1;min-width:0;padding:15px 12px 15px 16px;background:transparent;color:inherit;border:0;text-align:left;cursor:pointer;font:inherit}
+.gradea-track-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gradea-share{flex-shrink:0;margin-right:10px;padding:9px 10px;border:1px solid rgba(183,138,250,.35);border-radius:8px;background:rgba(183,138,250,.10);color:#cbaaff;font-size:10px;font-weight:700;letter-spacing:.04em;cursor:pointer}
+.gradea-share:hover,.gradea-share:focus-visible{background:rgba(183,138,250,.25);border-color:#b78afa}
+.gradea-track-play:focus-visible{outline:2px solid #b78afa;outline-offset:-2px}
+@media(max-width:420px){.gradea-track-play{gap:9px;padding:12px 8px}.gradea-share{margin-right:6px;padding:8px 6px;font-size:9px}}
