@@ -4,12 +4,24 @@ const audio=document.getElementById('gradea-audio');
 const el=id=>document.getElementById(id);
 const list=el('gradea-track-list');
 const FEATURED_TITLE='Be A Playa'; // Change this to any exact title in beats.json.
-let tracks=fallbackTracks,current=0,shuffle=false,repeat=false,history=[],historyCursor=-1;
+let tracks=fallbackTracks,current=0,shuffle=false,repeat=false,history=[],historyCursor=-1,activeFilter='all';
+const FAV_KEY='gradea-favorite-beats-v1';
+let favorites=[];
+try{const stored=JSON.parse(localStorage.getItem(FAV_KEY)||'[]');if(Array.isArray(stored))favorites=stored.filter(v=>typeof v==='string')}catch(e){}
+const key=t=>t.title.trim().toLocaleLowerCase();
+const isFavorite=t=>favorites.includes(key(t));
+function saveFavorites(){try{localStorage.setItem(FAV_KEY,JSON.stringify(favorites))}catch(e){}}
+function newIndices(){return new Set(tracks.slice(-Math.min(3,tracks.length)).map(key))}
+function updateFavoritesInquiry(){const selected=tracks.filter(isFavorite);el('gradea-fav-count').textContent=selected.length;const a=el('gradea-favorites-inquire');a.hidden=!selected.length;if(!selected.length)return;const body=`What's good GradeA,\n\nI'm interested in these beats from THE FREQUENCY:\n\n${selected.map(t=>'• '+t.title).join('\n')}\n\nName:\nProject / intended use:\n`;a.href=`mailto:beats@itsgradea.com?subject=${encodeURIComponent('Beat Inquiry — Favorites | GradeA')}&body=${encodeURIComponent(body)}`}
+function toggleFavorite(t){const k=key(t);favorites=isFavorite(t)?favorites.filter(v=>v!==k):[...favorites,k];saveFavorites();render();trackEvent('beat_favorite',{beat_title:t.title,is_favorite:isFavorite(t)})}
+function setFilter(filter){activeFilter=filter;document.querySelectorAll('.gradea-filter').forEach(b=>{const selected=b.dataset.filter===filter;b.classList.toggle('is-selected',selected);b.setAttribute('aria-pressed',String(selected))});render();trackEvent('beat_filter',{filter})}
+document.querySelectorAll('.gradea-filter').forEach(b=>b.addEventListener('click',()=>setFilter(b.dataset.filter)));
+el('gradea-favorites-inquire').addEventListener('click',()=>trackEvent('favorites_inquiry',{beat_count:tracks.filter(isFavorite).length}));
 const requestedBeat=new URLSearchParams(window.location.search).get('beat');
 audio.volume=.8;
 const time=n=>Number.isFinite(n)?`${Math.floor(n/60)}:${String(Math.floor(n%60)).padStart(2,'0')}`:'0:00';
 function trackEvent(name,detail={}){if(typeof window.gtag==='function')window.gtag('event',name,detail)}
-function sync(){const playing=!audio.paused;['gradea-main-play','gradea-sticky-play'].forEach(id=>{el(id).textContent=playing?'❚❚':'▶';el(id).setAttribute('aria-label',playing?'Pause':'Play')});list.querySelectorAll('.gradea-track').forEach((row,i)=>{row.classList.toggle('is-active',i===current);row.querySelector('.gradea-track-icon').textContent=i===current&&playing?'❚❚':'▶'});el('gradea-play-status').textContent=playing?'NOW TRANSMITTING':'READY TO PLAY'}
+function sync(){const playing=!audio.paused;['gradea-main-play','gradea-sticky-play'].forEach(id=>{el(id).textContent=playing?'❚❚':'▶';el(id).setAttribute('aria-label',playing?'Pause':'Play')});list.querySelectorAll('.gradea-track').forEach(row=>{const i=Number(row.dataset.index);row.classList.toggle('is-active',i===current);row.querySelector('.gradea-track-icon').textContent=i===current&&playing?'❚❚':'▶'});el('gradea-play-status').textContent=playing?'NOW TRANSMITTING':'READY TO PLAY'}
 function shareURL(title){const url=new URL(window.location.origin+window.location.pathname);url.searchParams.set('beat',title);url.hash='beat-player';return url.toString()}
 async function shareTrack(title,button){const url=shareURL(title);try{
   if(navigator.share){await navigator.share({title:`${title} — GradeA`,text:`Listen to ${title} on THE FREQUENCY`,url});trackEvent('beat_share',{beat_title:title,method:'native'});return}
@@ -18,14 +30,14 @@ async function shareTrack(title,button){const url=shareURL(title);try{
   const old=button.textContent;button.textContent='✓ COPIED';button.setAttribute('aria-label',`Link copied for ${title}`);setTimeout(()=>{button.textContent=old;button.setAttribute('aria-label',`Share ${title}`)},2200);
   trackEvent('beat_share',{beat_title:title,method:'copy'});
 }catch(e){if(e.name!=='AbortError')window.prompt('Copy this beat link:',url)} }
-function render(){list.replaceChildren();tracks.forEach((t,i)=>{
- const row=document.createElement('div');row.className='gradea-track';
+function render(){list.replaceChildren();const latest=newIndices();let visible=0;tracks.forEach((t,i)=>{if(activeFilter==='favorites'&&!isFavorite(t))return;if(activeFilter==='new'&&!latest.has(key(t)))return;visible++;
+ const row=document.createElement('div');row.className='gradea-track';row.dataset.index=String(i);
  const play=document.createElement('button');play.type='button';play.className='gradea-track-play';play.innerHTML=`<span class="gradea-track-index">${String(i+1).padStart(2,'0')}</span><span class="gradea-track-name"></span><span class="gradea-track-icon">▶</span>`;
- play.querySelector('.gradea-track-name').textContent=t.title;play.setAttribute('aria-label',`Play ${t.title}`);
+ play.querySelector('.gradea-track-name').textContent=t.title;if(latest.has(key(t))){const badge=document.createElement('span');badge.className='gradea-new-badge';badge.textContent='NEW';play.querySelector('.gradea-track-name').append(badge)}play.setAttribute('aria-label',`Play ${t.title}`);
  play.addEventListener('click',()=>{if(i===current)toggle();else load(i,true)});
  const share=document.createElement('button');share.type='button';share.className='gradea-share';share.textContent='↗ SHARE';share.setAttribute('aria-label',`Share ${t.title}`);share.addEventListener('click',()=>shareTrack(t.title,share));
- row.append(play,share);list.append(row)
- });el('gradea-track-count').textContent=`${String(tracks.length).padStart(2,'0')} TRACKS / ORIGINAL PRODUCTION`;sync()}
+ const fav=document.createElement('button');fav.type='button';fav.className='gradea-fav'+(isFavorite(t)?' is-favorite':'');fav.textContent=isFavorite(t)?'♥':'♡';fav.setAttribute('aria-label',`${isFavorite(t)?'Remove':'Add'} ${t.title} ${isFavorite(t)?'from':'to'} favorites`);fav.setAttribute('aria-pressed',String(isFavorite(t)));fav.addEventListener('click',()=>toggleFavorite(t));row.append(play,fav,share);list.append(row)
+ });el('gradea-filter-empty').hidden=visible!==0;el('gradea-filter-empty').textContent=activeFilter==='favorites'?'No favorites yet. Tap ♡ beside any beat to save it.':'No beats found in this category.';updateFavoritesInquiry();el('gradea-track-count').textContent=`${String(tracks.length).padStart(2,'0')} TRACKS / ORIGINAL PRODUCTION`;sync()}
 function applySharedBeat(){if(!requestedBeat)return;const index=tracks.findIndex(t=>t.title.toLocaleLowerCase()===requestedBeat.toLocaleLowerCase());if(index>=0){load(index,false);el('gradea-play-status').textContent='SHARED BEAT · PRESS PLAY';}else console.warn('Shared beat not found:',requestedBeat)}
 function updateInquiry(){const title=tracks[current].title;const subject=`Beat Inquiry — ${title} | GradeA`;const body=`What's good GradeA,\n\nI'm interested in the beat \"${title}\" that I heard on your website. I'd like to discuss working with you.\n\nName:\nProject / intended use:\n`;const link=el('gradea-beat-inquire');link.href=`mailto:beats@itsgradea.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;el('gradea-inquiry-title').textContent=title}
 el('gradea-beat-inquire').addEventListener('click',()=>trackEvent('beat_inquiry',{beat_title:tracks[current].title}));

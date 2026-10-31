@@ -77,3 +77,21 @@ body{padding-bottom:76px}
 .gradea-license-notice{max-width:720px;margin:0 auto;color:#afa3bf;font-size:12px;line-height:1.8}
 .gradea-license-notice strong{color:#e3d3ff}
 @media(max-width:600px){.gradea-inquiry-panel{padding:22px 15px}.gradea-inquire-button{display:flex;width:100%;font-size:11px}}
+
+/* GradeA favorites, latest drops, and custom production */
+.gradea-library-tools{display:flex;gap:9px;flex-wrap:wrap;margin:24px 0 14px}
+.gradea-filter{border:1px solid rgba(180,120,255,.25);background:rgba(255,255,255,.035);color:#d8c8ec;border-radius:24px;padding:11px 16px;font-size:11px;font-weight:750;letter-spacing:1px;cursor:pointer}
+.gradea-filter.is-selected,.gradea-filter:hover{border-color:#b78aff;background:rgba(169,122,255,.18);color:white}
+.gradea-filter-empty{padding:20px;color:#bcb8c8;font-size:13px}
+.gradea-favorites-action{display:flex;justify-content:flex-start;margin:10px 0 18px}
+.gradea-favorites-action [hidden]{display:none!important}
+.gradea-fav{background:transparent;border:0;color:#bcb8c8;cursor:pointer;font-size:25px;padding:8px 10px;min-width:43px;flex-shrink:0}
+.gradea-fav:hover,.gradea-fav.is-favorite{color:#c79aff}
+.gradea-new-badge{display:inline-block;margin-left:9px;padding:3px 6px;border-radius:4px;background:rgba(169,122,255,.2);color:#c9a6ff;font-size:9px;letter-spacing:1px;vertical-align:middle}
+.gradea-work-section{padding:100px 24px;background:linear-gradient(140deg,rgba(80,35,124,.24),rgba(9,7,16,.95));border-top:1px solid rgba(180,120,255,.17)}
+.gradea-work-inner{max-width:760px;margin:auto;text-align:center}
+.gradea-work-inner h2{font-size:clamp(30px,5vw,52px);margin:18px 0 24px;color:white}
+.gradea-work-inner h2 i{color:#b78aff}
+.gradea-work-inner p:not(.eyebrow){color:#c5c0d1;line-height:1.8;margin:12px 0}
+.gradea-work-inner .btn{display:inline-block;margin-top:25px}
+@media(max-width:600px){.gradea-library-tools{gap:7px}.gradea-filter{font-size:10px;padding:10px 12px}.gradea-fav{padding:8px 5px;min-width:34px}.gradea-new-badge{margin-left:5px}}
