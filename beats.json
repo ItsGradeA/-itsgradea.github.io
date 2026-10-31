@@ -30,5 +30,37 @@
   {
     "title": "HarpHeart",
     "src": "assets/beats/track-08.mp3"
-  }
+  },
+  {
+  "title": "CantLeaveMe",
+  "src": "assets/beats/CantLeaveMe (prod. x GradeA).mp3"
+},
+{
+  "title": "HopeNWish",
+  "src": "assets/beats/HopeNWish (prod. x GradeA).mp3"
+},
+{
+  "title": "HornzNShii",
+  "src": "assets/beats/HornzNShit (prod. x GradeA).mp3"
+},
+{
+  "title": "JusAVybe24",
+  "src": "assets/beats/JusAWybe24 (prod. x GradeA).mp3"
+},
+{
+  "title": "MyPlace",
+  "src": "assets/beats/MyPlace (Prod. x GradeA).mp3"
+},
+{
+  "title": "Ricch",
+  "src": "assets/beats/Ricch (Prod. x GradeA).mp3"
+},
+{
+  "title": "SeaBreeze",
+  "src": "assets/beats/SeaBreeze (prod. x GradeA).mp3"
+},
+{
+  "title": "caintbreal",
+  "src": "assets/beats/cainitreal(prod x GradeA).mp3"
+}
 ]
